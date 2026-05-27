@@ -5,6 +5,22 @@
   --shade: #c2b39d;
   --bg-1: #f1e8d8;
   --bg-2: #dfd1b8;
+  --bg-accent-1: #fff7ea;
+  --bg-accent-2: #ecdbc2;
+  --button-bg: #31281f;
+  --button-hover: #1f1914;
+  --status: #5c4f43;
+}
+
+body[data-theme="dark"] {
+  --ink: #efe6d8;
+  --bg-1: #201b17;
+  --bg-2: #11100f;
+  --bg-accent-1: #3b332b;
+  --bg-accent-2: #2b2721;
+  --button-bg: #d8c9b3;
+  --button-hover: #e8dcc9;
+  --status: #d5c7b4;
 }
 
 * {
@@ -15,8 +31,8 @@ body {
   margin: 0;
   min-height: 100vh;
   color: var(--ink);
-  background: radial-gradient(circle at 20% 10%, #fff7ea 0%, transparent 45%),
-    radial-gradient(circle at 80% 85%, #ecdbc2 0%, transparent 50%),
+  background: radial-gradient(circle at 20% 10%, var(--bg-accent-1) 0%, transparent 45%),
+    radial-gradient(circle at 80% 85%, var(--bg-accent-2) 0%, transparent 50%),
     linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%);
   font-family: "Space Grotesk", sans-serif;
   display: grid;
@@ -112,6 +128,7 @@ body {
   gap: 1rem;
 }
 
+.theme-toggle,
 .sound-toggle {
   display: inline-flex;
   align-items: center;
@@ -121,14 +138,15 @@ body {
   letter-spacing: 0.08em;
 }
 
+.theme-toggle input,
 .sound-toggle input {
-  accent-color: #31281f;
+  accent-color: var(--button-bg);
 }
 
 button {
   border: 0;
-  background: #31281f;
-  color: #fff;
+  background: var(--button-bg);
+  color: #fffdf8;
   padding: 0.65rem 1.05rem;
   border-radius: 999px;
   cursor: pointer;
@@ -140,8 +158,12 @@ button {
 }
 
 button:hover {
-  background: #1f1914;
+  background: var(--button-hover);
   transform: translateY(-1px);
+}
+
+body[data-theme="dark"] button {
+  color: #1f1914;
 }
 
 button:disabled {
@@ -161,7 +183,7 @@ button:disabled {
   text-align: center;
   margin: 0;
   min-height: 1.5em;
-  color: #5c4f43;
+  color: var(--status);
 }
 
 @keyframes breathe {

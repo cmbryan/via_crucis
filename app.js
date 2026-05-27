@@ -3,9 +3,12 @@ const PDF_FILE = "./via_crucis_chapter_1.pdf";
 const bookElement = document.getElementById("book");
 const prevButton = document.getElementById("prev-page");
 const nextButton = document.getElementById("next-page");
+const themeToggle = document.getElementById("theme-dark");
 const soundToggle = document.getElementById("sound-enabled");
 const pageStatus = document.getElementById("page-status");
 const message = document.getElementById("message");
+
+const THEME_STORAGE_KEY = "via-crucis-theme";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
@@ -14,6 +17,26 @@ let flipbook = null;
 let pageCount = 0;
 let audioContext = null;
 let soundEnabled = true;
+
+function applyTheme(theme) {
+  document.body.setAttribute("data-theme", theme);
+  themeToggle.checked = theme === "dark";
+}
+
+function initializeTheme() {
+  const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+  const prefersDark =
+    window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
+
+  applyTheme(initialTheme);
+
+  themeToggle.addEventListener("change", () => {
+    const theme = themeToggle.checked ? "dark" : "light";
+    applyTheme(theme);
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  });
+}
 
 function setMessage(text) {
   message.textContent = text;
@@ -165,6 +188,7 @@ function setupFlipbook(pageElements) {
 
 async function init() {
   try {
+    initializeTheme();
     setMessage("Rendering pages...");
 
     const pdf = await pdfjsLib.getDocument(PDF_FILE).promise;
