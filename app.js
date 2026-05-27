@@ -128,6 +128,71 @@ function buildPageElement(canvas) {
   return page;
 }
 
+async function getPageLinkHotspots(pdfPage, viewport) {
+  try {
+    const annotations = await pdfPage.getAnnotations({ intent: "display" });
+
+    return annotations
+      .filter((annotation) => annotation.subtype === "Link")
+      .map((annotation) => {
+        const href = annotation.url || annotation.unsafeUrl;
+        if (!href || !annotation.rect) {
+          return null;
+        }
+
+        const bounds = viewport.convertToViewportRectangle(annotation.rect);
+        const left = Math.min(bounds[0], bounds[2]);
+        const top = Math.min(bounds[1], bounds[3]);
+        const width = Math.abs(bounds[2] - bounds[0]);
+        const height = Math.abs(bounds[3] - bounds[1]);
+
+        if (width <= 0 || height <= 0) {
+          return null;
+        }
+
+        return {
+          href,
+          leftPct: (left / viewport.width) * 100,
+          topPct: (top / viewport.height) * 100,
+          widthPct: (width / viewport.width) * 100,
+          heightPct: (height / viewport.height) * 100,
+        };
+      })
+      .filter(Boolean);
+  } catch (error) {
+    console.warn("Could not read PDF annotations for links", error);
+    return [];
+  }
+}
+
+function createLinkLayer(hotspots) {
+  const layer = document.createElement("div");
+  layer.className = "link-layer";
+
+  hotspots.forEach((hotspot) => {
+    const link = document.createElement("a");
+    link.className = "pdf-link-hotspot";
+    link.href = hotspot.href;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.style.left = `${hotspot.leftPct}%`;
+    link.style.top = `${hotspot.topPct}%`;
+    link.style.width = `${hotspot.widthPct}%`;
+    link.style.height = `${hotspot.heightPct}%`;
+
+    // Prevent drag-to-flip handlers from hijacking link interactions.
+    ["pointerdown", "mousedown", "touchstart", "click"].forEach((eventName) => {
+      link.addEventListener(eventName, (event) => {
+        event.stopPropagation();
+      });
+    });
+
+    layer.appendChild(link);
+  });
+
+  return layer;
+}
+
 function ensureAudioContext() {
   if (!audioContext) {
     audioContext = new window.AudioContext();
@@ -179,20 +244,27 @@ async function renderPdfPages(pdf) {
   const pages = [];
 
   for (let pageIndex = 1; pageIndex <= pdf.numPages; pageIndex += 1) {
-    const page = await pdf.getPage(pageIndex);
-    const viewport = page.getViewport({ scale: 2 });
+    const pdfPage = await pdf.getPage(pageIndex);
+    const viewport = pdfPage.getViewport({ scale: 2 });
 
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d", { alpha: false });
     canvas.width = viewport.width;
     canvas.height = viewport.height;
 
-    await page.render({
+    await pdfPage.render({
       canvasContext: context,
       viewport,
     }).promise;
 
-    pages.push(buildPageElement(canvas));
+    const pageElement = buildPageElement(canvas);
+    const hotspots = await getPageLinkHotspots(pdfPage, viewport);
+
+    if (hotspots.length > 0) {
+      pageElement.appendChild(createLinkLayer(hotspots));
+    }
+
+    pages.push(pageElement);
   }
 
   return pages;
