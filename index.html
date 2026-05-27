@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Via Crucis Reader</title>
+    <meta
+      name="description"
+      content="A minimal online reader for Via Crucis with a page-turning book interface."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Space+Grotesk:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/page-flip/dist/css/page-flip.css"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="reader-shell">
+      <section class="book-stage" aria-live="polite">
+        <div class="book-glow"></div>
+        <div id="book" class="book" aria-label="Flipbook reader"></div>
+      </section>
+
+      <nav class="controls" aria-label="Reader controls">
+        <button id="prev-page" type="button">Previous</button>
+        <p id="page-status">Loading...</p>
+        <button id="next-page" type="button">Next</button>
+        <label class="sound-toggle" for="sound-enabled">
+          <input id="sound-enabled" type="checkbox" checked />
+          <span>Sound</span>
+        </label>
+      </nav>
+
+      <p id="message" class="message"></p>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
