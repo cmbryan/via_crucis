@@ -24,21 +24,53 @@
     <main class="reader-shell">
       <section class="book-stage" aria-live="polite">
         <div class="book-glow"></div>
+        <button
+          id="focus-mode"
+          class="overlay-focus-button"
+          type="button"
+          aria-label="Enter full view"
+          title="Enter full view"
+        >
+          <svg class="icon icon-enter" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M4 9V4h5" />
+            <path d="M20 9V4h-5" />
+            <path d="M4 15v5h5" />
+            <path d="M20 15v5h-5" />
+          </svg>
+          <svg class="icon icon-exit" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M9 4H4v5" />
+            <path d="M15 4h5v5" />
+            <path d="M9 20H4v-5" />
+            <path d="M15 20h5v-5" />
+          </svg>
+        </button>
         <div id="book" class="book" aria-label="Flipbook reader"></div>
       </section>
 
       <nav class="controls" aria-label="Reader controls">
-        <button id="prev-page" type="button">Previous</button>
-        <p id="page-status">Loading...</p>
-        <button id="next-page" type="button">Next</button>
-        <label class="theme-toggle" for="theme-dark">
-          <input id="theme-dark" type="checkbox" />
-          <span>Light/Dark</span>
-        </label>
-        <label class="sound-toggle" for="sound-enabled">
-          <input id="sound-enabled" type="checkbox" checked />
-          <span>Sound</span>
-        </label>
+        <div class="page-controls">
+          <button id="prev-page" type="button">Previous</button>
+          <p id="page-status">Loading...</p>
+          <button id="next-page" type="button">Next</button>
+        </div>
+        <div class="settings-row">
+          <label class="theme-toggle" for="theme-dark">
+            <input id="theme-dark" type="checkbox" />
+            <span>Light/Dark</span>
+          </label>
+          <label class="sound-toggle" for="sound-enabled">
+            <input id="sound-enabled" type="checkbox" checked />
+            <span>Sound</span>
+          </label>
+        </div>
+        <span class="control-break" aria-hidden="true"></span>
+        <details id="download-menu" class="download-menu">
+          <summary>Download</summary>
+          <div class="download-options" role="menu" aria-label="Download format">
+            <a id="download-pdf" href="#" download role="menuitem">PDF</a>
+            <a id="download-epub" href="#" download role="menuitem">EPUB</a>
+          </div>
+        </details>
       </nav>
 
       <p id="message" class="message"></p>

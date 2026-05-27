@@ -1,8 +1,14 @@
 const PDF_FILE = "./via_crucis_chapter_1.pdf";
+const EPUB_FILE = "./via_crucis_chapter_1.epub";
 
 const bookElement = document.getElementById("book");
+const bookStage = document.querySelector(".book-stage");
 const prevButton = document.getElementById("prev-page");
 const nextButton = document.getElementById("next-page");
+const downloadMenu = document.getElementById("download-menu");
+const downloadPdfLink = document.getElementById("download-pdf");
+const downloadEpubLink = document.getElementById("download-epub");
+const focusModeButton = document.getElementById("focus-mode");
 const themeToggle = document.getElementById("theme-dark");
 const soundToggle = document.getElementById("sound-enabled");
 const pageStatus = document.getElementById("page-status");
@@ -17,6 +23,58 @@ let flipbook = null;
 let pageCount = 0;
 let audioContext = null;
 let soundEnabled = true;
+let isBookOnlyMode = false;
+
+function refreshBookLayout() {
+  // Give the DOM a frame to apply size classes before forcing a flipbook recalculation.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (flipbook && typeof flipbook.update === "function") {
+        flipbook.update();
+      }
+    });
+  });
+}
+
+function applyBookOnlyMode(enabled) {
+  isBookOnlyMode = enabled;
+  document.body.classList.toggle("book-only", enabled);
+  focusModeButton.classList.toggle("is-active", enabled);
+  focusModeButton.setAttribute("aria-label", enabled ? "Exit full view" : "Enter full view");
+  focusModeButton.setAttribute("title", enabled ? "Exit full view" : "Enter full view");
+  refreshBookLayout();
+}
+
+async function toggleBookView() {
+  if (!document.fullscreenEnabled) {
+    applyBookOnlyMode(!isBookOnlyMode);
+    return;
+  }
+
+  if (document.fullscreenElement) {
+    await document.exitFullscreen();
+    return;
+  }
+
+  await bookStage.requestFullscreen();
+}
+
+function initializeBookViewToggle() {
+  focusModeButton.addEventListener("click", async () => {
+    try {
+      await toggleBookView();
+    } catch (error) {
+      console.error(error);
+      applyBookOnlyMode(!isBookOnlyMode);
+    }
+  });
+
+  document.addEventListener("fullscreenchange", () => {
+    applyBookOnlyMode(Boolean(document.fullscreenElement));
+  });
+
+  window.addEventListener("resize", refreshBookLayout);
+}
 
 function applyTheme(theme) {
   document.body.setAttribute("data-theme", theme);
@@ -35,6 +93,20 @@ function initializeTheme() {
     const theme = themeToggle.checked ? "dark" : "light";
     applyTheme(theme);
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  });
+}
+
+function setupDownloads() {
+  downloadPdfLink.href = PDF_FILE;
+  downloadPdfLink.setAttribute("download", PDF_FILE.split("/").pop());
+
+  downloadEpubLink.href = EPUB_FILE;
+  downloadEpubLink.setAttribute("download", EPUB_FILE.split("/").pop());
+
+  [downloadPdfLink, downloadEpubLink].forEach((link) => {
+    link.addEventListener("click", () => {
+      downloadMenu.removeAttribute("open");
+    });
   });
 }
 
@@ -189,6 +261,8 @@ function setupFlipbook(pageElements) {
 async function init() {
   try {
     initializeTheme();
+    initializeBookViewToggle();
+    setupDownloads();
     setMessage("Rendering pages...");
 
     const pdf = await pdfjsLib.getDocument(PDF_FILE).promise;
